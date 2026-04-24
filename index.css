@@ -16,7 +16,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: clamp(1rem, 2vw, 2rem);
 }
 
 body {
@@ -45,24 +45,35 @@ a {
 }
 .row {
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 3rem);
   flex-wrap: wrap;
   width: 100%;
 }
 
 .column {
-  float: left;
-  padding: 10px;
-}
-
-.left {
-  width: 25%;
+  padding: 0.625rem;
 }
 
 .right {
-  width: 40%;
+  flex: 1 1 24rem;
+  max-width: 40rem;
 }
 
 .rocket {
-  margin-top: 105px;
+  width: min(65vw, 420px);
+  height: auto;
+  margin-top: 0;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.2em;
+  }
+
+  .right {
+    max-width: 100%;
+  }
 }
