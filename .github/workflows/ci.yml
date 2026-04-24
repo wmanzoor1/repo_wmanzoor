@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - work
+
+jobs:
+  validate-static-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          test -f index.html
+          test -f index.css
+          test -f rocket.gif
+          test -f favicon.svg
+
+      - name: Dry-run static site locally
+        run: |
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          PID=$!
+          sleep 2
+          curl -fI http://127.0.0.1:8080/index.html
+          curl -fI http://127.0.0.1:8080/index.css
+          kill $PID
+
+      - name: Upload server log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: http-server-log
+          path: /tmp/http.log

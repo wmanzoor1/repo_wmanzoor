@@ -1,0 +1,46 @@
+name: Provision Azure Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment name (dev/test/prod)"
+        required: true
+        default: "prod"
+      location:
+        description: "Azure region"
+        required: true
+        default: "eastus2"
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --location "${{ inputs.location }}"
+
+      - name: Deploy Bicep template
+        run: |
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="${{ inputs.location }}" \
+              environmentName="${{ inputs.environment }}" \
+              staticWebAppName="${{ vars.AZURE_STATIC_WEB_APP_NAME }}"
